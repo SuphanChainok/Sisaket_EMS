@@ -1,0 +1,452 @@
+/* ============================================
+   TABLE STYLES - PROFESSIONAL (Themed)
+============================================ */
+
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   FILTER SECTION (FIXED & SAFE LAYOUT)
+============================================ */
+
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  flex-wrap: wrap; /* ✅ ยอมให้ปัดตกบรรทัด */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* ✅ เว้นระยะห่างให้ชัดเจน */
+  flex-wrap: wrap; /* ✅ ถ้าที่เต็ม ให้ปุ่มอื่นลงไปบรรทัดใหม่ ไม่ซ้อนทับ */
+  flex: 1; /* กินพื้นที่ที่เหลือ */
+}
+
+/* --- Search Box (แก้จุดทับกัน) --- */
+.search-box {
+  position: relative;
+  
+  /* ⛔️ ยกเลิกการยืดหยุ่น (สำคัญมาก) */
+  flex-grow: 0; 
+  flex-shrink: 0;
+  
+  /* ✅ กำหนดความกว้างตายตัวไปเลย */
+  width: 260px; 
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  z-index: 2; /* ✅ ดันไอคอนขึ้นมาหน้าสุด */
+}
+
+.search-input-table {
+  width: 100%;
+  height: 40px; /* สูงเท่าปุ่มอื่น */
+  padding: 0 16px 0 40px; /* เว้นที่ให้ไอคอน */
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+  
+  /* ✅ ป้องกัน Input ทะลุกรอบ */
+  box-sizing: border-box; 
+}
+
+.search-input-table:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* --- Dropdowns --- */
+.filter-select {
+  height: 40px;
+  padding: 0 14px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  
+  /* ✅ กำหนดขนาดให้พอดี ไม่ใหญ่เกิน */
+  min-width: 160px;
+  flex-shrink: 0; /* ห้ามหดจนเพี้ยน */
+}
+
+.filter-select:hover { border-color: var(--text-secondary); }
+.filter-select:focus { outline: none; border-color: #3b82f6; }
+.filter-select option { background: var(--bg-card); color: var(--text-primary); }
+
+/* --- Buttons --- */
+.btn-search, .btn-reset, .btn-import {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0; /* ห้ามหด */
+}
+
+.btn-search {
+  padding: 0 20px;
+  background: #3b82f6;
+  color: white;
+  gap: 6px;
+}
+.btn-search:hover { background: #2563eb; transform: translateY(-1px); }
+
+.btn-reset {
+  width: 40px;
+  padding: 0;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+.btn-reset:hover { background: var(--hover-color); color: var(--text-primary); transform: rotate(180deg); }
+
+.btn-import {
+  padding: 0 20px;
+  background: linear-gradient(135deg, #8a2be2, #6a1bb8);
+  color: white;
+}
+.btn-import:hover { background: linear-gradient(135deg, #7b24d1, #5a18a0); transform: translateY(-1px); }
+
+
+/* --- Responsive (มือถือ) --- */
+@media (max-width: 768px) {
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%; /* มือถือให้เต็มจอ */
+  }
+
+  .filter-select, .btn-search, .btn-import {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .btn-reset {
+    width: 100%; /* ปุ่ม Reset เต็มจอในมือถือ */
+  }
+}
+
+/* Results Summary */
+.results-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+}
+
+.results-text {
+  color: var(--text-secondary); /* ✅ */
+  font-size: 14px;
+}
+
+.results-count {
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.results-page {
+  color: var(--text-secondary); /* ✅ */
+  font-size: 13px;
+}
+
+/* Table Container */
+.table-container {
+  background: var(--bg-card); /* ✅ */
+  border: 1px solid var(--border-color); /* ✅ */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead {
+  background: var(--bg-main); /* ✅ หัวตารางสีเดียวกับพื้นหลังหลัก */
+  border-bottom: 2px solid var(--border-color);
+}
+
+.data-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary); /* ✅ */
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border-color); /* ✅ */
+  transition: all 0.2s ease;
+  background: var(--bg-card);
+}
+
+.data-table tbody tr:hover {
+  background: var(--hover-color); /* ✅ */
+}
+
+.data-table td {
+  padding: 16px 20px;
+  color: var(--text-primary); /* ✅ */
+  vertical-align: middle;
+}
+
+/* Center Name Column */
+.center-name strong {
+  display: block;
+  color: var(--text-primary); /* ✅ ชื่อศูนย์ชัดเจนทั้ง 2 โหมด */
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.center-location {
+  font-size: 12px;
+  color: var(--text-secondary); /* ✅ */
+}
+
+.center-type {
+  color: var(--text-secondary); /* ✅ */
+}
+
+.center-contact {
+  color: #4db6ac;
+  font-family: monospace;
+}
+
+.center-capacity {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.center-date {
+  color: var(--text-secondary); /* ✅ */
+  font-size: 13px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(77, 182, 172, 0.15);
+  color: #26a69a;
+  border: 1px solid rgba(77, 182, 172, 0.3);
+}
+
+.status-badge.inactive {
+  background: rgba(239, 83, 80, 0.15);
+  color: #ef5350;
+  border: 1px solid rgba(239, 83, 80, 0.3);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-edit:hover {
+  background: #3b82f6;
+  color: white;
+  transform: scale(1.05);
+}
+
+.btn-delete {
+  background: rgba(239, 83, 80, 0.1);
+  color: #ef5350;
+  border: 1px solid rgba(239, 83, 80, 0.2);
+}
+
+.btn-delete:hover {
+  background: #ef5350;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Loading & No Results */
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary); /* ✅ */
+  font-size: 16px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary); /* ✅ */
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .data-table {
+    font-size: 13px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+  }
+  
+  .search-box {
+    min-width: 100%;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    min-width: 900px;
+  }
+}
+
+/* ============================================
+   PAGINATION STYLES
+============================================ */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 20px;
+}
+
+.pagination-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 8px 12px;
+  background: var(--bg-card); /* ✅ */
+  border: 1px solid var(--border-color); /* ✅ */
+  border-radius: 8px;
+  color: var(--text-primary); /* ✅ */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--hover-color);
+  border-color: var(--text-secondary);
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: var(--bg-main);
+}
+
+.pagination-ellipsis {
+  color: var(--text-secondary); /* ✅ */
+  padding: 0 8px;
+  font-size: 14px;
+}
