@@ -1,23 +1,648 @@
+/* ============================================
+   SIDEBAR STYLES - PROFESSIONAL (Themed)
+============================================ */
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: var(--bg-sidebar); /* ✅ เปลี่ยนเป็นตัวแปร */
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color); /* ✅ เปลี่ยนเป็นตัวแปร */
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: background-color 0.3s, border-color 0.3s;
+  z-index: 50;
+}
+
+/* Header */
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--border-color); /* ✅ */
+  text-align: center;
+}
+
+.sidebar-logo {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.sidebar-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary); /* ✅ สีตัวหนังสือหลัก */
+  letter-spacing: 0.5px;
+}
+
+.sidebar-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: var(--text-secondary); /* ✅ สีตัวหนังสือรอง */
+  font-weight: 400;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: 28px;
+}
+
+.section-label {
+  padding: 0 20px 8px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary); /* ✅ */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--text-secondary); /* ✅ */
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  position: relative;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-purple); /* ✅ ใช้สีม่วง Theme */
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.nav-link:hover {
+  background: var(--hover-color); /* ✅ ใช้สี Hover กลาง */
+  color: var(--text-primary); /* ✅ */
+}
+
+.nav-link.active {
+  background: rgba(121, 134, 203, 0.15); /* สีม่วงจางๆ (Hardcode ได้เพราะดูดีทั้ง 2 โหมด) */
+  color: var(--text-primary); /* ✅ */
+  font-weight: 500;
+}
+
+.nav-link.active .nav-icon {
+  color: var(--accent-purple); /* ✅ ไอคอนเป็นสีม่วง */
+}
+
+.nav-link.active::before {
+  transform: scaleY(1);
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.nav-text {
+  flex: 1;
+}
+
+/* Public Links (โซนสีเขียว) */
+.nav-link.public {
+  color: var(--text-secondary);
+}
+
+.nav-link.public:hover {
+  background: var(--hover-color);
+  color: var(--accent-green); /* ✅ */
+}
+
+.nav-link.public.active {
+  background: rgba(38, 166, 154, 0.15); /* สีเขียวจางๆ */
+  color: var(--text-primary);
+}
+
+.nav-link.public.active .nav-icon {
+  color: var(--accent-green); /* ✅ */
+}
+
+.nav-link.public.active::before {
+  background: var(--accent-green); /* ✅ */
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-color); /* ✅ */
+  background: var(--bg-sidebar);
+}
+
+.user-profile-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--hover-color); /* ✅ ปรับให้เข้ากับ Theme */
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.user-profile-sidebar:hover {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.user-avatar-sidebar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-green)); /* ✅ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-info-sidebar {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-role-sidebar {
+  font-size: 11px;
+  color: var(--text-secondary); /* ✅ */
+  margin-bottom: 2px;
+}
+
+.user-name-sidebar {
+  font-size: 14px;
+  color: var(--text-primary); /* ✅ */
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Scrollbar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--border-color); /* ✅ */
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary); /* ✅ */
+}
+
+/* App Container Layout */
 .app-container {
   display: flex;
   min-height: 100vh;
+  background-color: var(--bg-main); /* ✅ เพิ่มสีพื้นหลังรวม */
 }
 
 .main-content {
   flex: 1;
-  padding: 30px;
-  margin-left: 250px; /* เว้นที่ให้ Sidebar */
-  background-color: var(--bg-main);
+  margin-left: 260px; /* เท่ากับความกว้างของ Sidebar */
+  padding: 32px;
+  background: var(--bg-main); /* ✅ ใช้ตัวแปร */
+  min-height: 100vh;
+  transition: background-color 0.3s;
 }
 
-.sidebar {
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+  
+  .app-container {
+    flex-direction: column;
+  }
+}
+
+/* ============================================
+   HEADER STYLES (Content Header)
+============================================ */
+
+.header-container {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--border-color); /* ✅ เปลี่ยนตามโหมด */
+  padding-bottom: 20px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--text-primary); /* ✅ สำคัญ! สีจะเปลี่ยนเป็น ดำ/ขาว ตามโหมด */
+  font-weight: 700;
+}
+
+.header-subtitle {
+  color: var(--text-secondary); /* ✅ สีเทาเข้ม/เทาอ่อน ตามโหมด */
+  margin: 8px 0 0 0;
+  font-size: 0.95rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ปุ่ม Search ใน Header */
+.header-search-wrapper {
+  position: relative;
+}
+
+.header-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+
+.header-search-input {
+  padding-left: 38px;
+  background: var(--bg-card); /* ✅ */
+  border: 1px solid var(--border-color);
+  color: var(--text-primary); /* ✅ */
+  border-radius: 8px;
+  height: 40px;
   width: 250px;
-  background-color: var(--bg-card);
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  border-right: 1px solid var(--border-color);
-  padding: 20px;
+  outline: none;
+}
+
+/* User Profile ใน Header */
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 20px;
+  border-left: 1px solid var(--border-color);
+}
+
+.header-profile-text {
+  text-align: right;
+}
+
+.header-profile-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary); /* ✅ */
+}
+
+.header-profile-status {
+  font-size: 0.75rem;
+  color: var(--accent-green);
+}
+
+.header-profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, var(--accent-purple), var(--accent-green));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+/* ปุ่มสลับโหมด */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--hover-color);
+  transform: scale(1.05);
+}
+/* ============================================
+   NEW HEADER STYLES (Supports Dark/Light)
+============================================ */
+
+.page-header {
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Title Section */
+.header-title {
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--text-primary); /* ✅ สีตามโหมด */
+  font-weight: 700;
+}
+
+.header-subtitle {
+  color: var(--text-secondary); /* ✅ สีตามโหมด */
+  margin: 5px 0 0 0;
+  font-size: 0.95rem;
+}
+
+/* Actions Area */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Search Box */
+.search-container {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+
+.search-input {
+  padding-left: 38px;
+  background: var(--bg-card); /* ✅ พื้นหลังตามโหมด */
+  border: 1px solid var(--border-color);
+  color: var(--text-primary); /* ✅ ตัวหนังสือตามโหมด */
+  border-radius: 8px;
+  height: 40px;
+  width: 240px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card); /* ✅ */
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--hover-color);
+  transform: scale(1.05);
+}
+
+/* Notification System */
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card); /* ✅ */
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.notification-button:hover,
+.notification-button.active {
+  background: var(--hover-color);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background: #ef5350;
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 320px;
+  background: var(--bg-card); /* ✅ พื้นหลัง Dropdown */
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   z-index: 100;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+.notification-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.notification-count-badge {
+  background: #ef5350;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: var(--hover-color); /* ✅ */
+}
+
+.notification-item.unread {
+  background: rgba(59, 130, 246, 0.05); /* Highlight สีฟ้าจางๆ */
+}
+
+.notification-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--hover-color);
+}
+
+.notif-title {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.notif-time {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.notification-view-all {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  color: #3b82f6;
+  font-weight: 500;
+  cursor: pointer;
+  border-top: 1px solid var(--border-color);
+}
+
+.notification-view-all:hover {
+  background: var(--hover-color);
+}
+
+/* User Profile */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+}
+
+.user-info {
+  text-align: right;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.user-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background: #26a69a;
+  border-radius: 50%;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: #26a69a;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7986cb, #26a69a);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

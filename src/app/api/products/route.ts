@@ -1,0 +1,26 @@
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/mongodb';
+import Product from '@/models/Product';
+
+// GET: ดึงรายการสินค้าทั้งหมด
+export async function GET() {
+  await dbConnect();
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(products);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+  }
+}
+
+// POST: เพิ่มสินค้าใหม่
+export async function POST(req: Request) {
+  await dbConnect();
+  try {
+    const body = await req.json();
+    const newProduct = await Product.create(body);
+    return NextResponse.json(newProduct, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+  }
+}
