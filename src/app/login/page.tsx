@@ -24,7 +24,17 @@ export default function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-logo">⚡</div>
+        <div className="auth-logo" style={{ width: '100px', height: '100px' }}>
+          <img 
+            src="/ssk-logo.jpg" 
+            alt="Sisaket EMS Logo" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
         <h1 className="auth-title">Sisaket EMS</h1>
         <p className="auth-subtitle">ระบบบริหารจัดการภาวะวิกฤต</p>
 

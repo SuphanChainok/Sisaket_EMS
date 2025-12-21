@@ -105,7 +105,7 @@ export default function CentersPage() {
       setFormData({ name: '', location: '', type: 'เมืองศรีสะเกษ', population: 100, contact: '', status: 'active' });
       fetchCenters();
     } catch (error) {
-      alert('❌ เกิดข้อผิดพลาดในการบันทึก');
+      alert('✖ เกิดข้อผิดพลาดในการบันทึก');
     }
   };
 
@@ -172,7 +172,7 @@ export default function CentersPage() {
       <div className="filter-section">
         <div className="filter-group">
           <div className="search-box">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"></span>
             <input
               type="text"
               placeholder="ค้นหา (ชื่อ, สถานที่, ติดต่อ)"
@@ -288,7 +288,7 @@ export default function CentersPage() {
             </tbody>
           </table>
           {filteredCenters.length === 0 && (
-            <div className="no-results">❌ ไม่พบข้อมูลศูนย์พักพิงที่ค้นหา</div>
+            <div className="no-results">✖ ไม่พบข้อมูลศูนย์พักพิงที่ค้นหา</div>
           )}
         </div>
       )}

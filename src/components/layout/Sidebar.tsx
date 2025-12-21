@@ -9,27 +9,36 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
 
-  const menuItems = [
-    { name: 'ภาพรวม', icon: '📊', path: '/' },
+const menuItems = [
+    { name: 'ภาพรวม', icon: '📈', path: '/' },
     { name: '⚠️ ระบบบัญชาการฉุกเฉิน', icon: '🚨', path: '/emergency' },
-    { name: 'จัดการศูนย์พักพิง', icon: '🏢', path: '/centers' },
-    { name: 'รายชื่อผู้ประสบภัย', icon: '👨‍👩‍👧‍👦', path: '/beneficiaries' },
+    { name: 'จัดการศูนย์พักพิง', icon: '🏕️', path: '/centers' },
+    { name: 'รายชื่อผู้ประสบภัย', icon: '👤', path: '/beneficiaries' },
     { name: 'คลังสินค้า', icon: '📦', path: '/inventory' },
-    { name: 'รายการเบิกจ่าย', icon: '🚚', path: '/transfers' },
-    // ✅ เพิ่มเมนูนี้เข้าไปครับ (จะได้กดดู Log ได้)
-    { name: 'ประวัติการใช้งาน', icon: '📜', path: '/logs' }, 
+    { name: 'รายการเบิกจ่าย', icon: '🚛', path: '/transfers' },
+    { name: 'ประวัติการใช้งาน', icon: '📋', path: '/logs' }, 
   ];
 
   const publicItems = [
     { name: 'แจ้งขอความช่วยเหลือ', icon: '🆘', path: '/request' },
-    { name: 'อัปเดตยอดผู้อพยพ', icon: '👥', path: '/update-population' },
+    { name: 'อัปเดตยอดผู้อพยพ', icon: '📊', path: '/update-population' },
   ];
 
   return (
     <aside className="sidebar">
       {/* Header */}
       <div className="sidebar-header">
-        <span className="sidebar-logo">⚡</span>
+        <div className="sidebar-logo">
+          <img 
+            src="/ssk-logo.jpg" 
+            alt="Sisaket EMS Logo" 
+            style={{
+              width: '30%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
+        </div>
         <div>
           <h2 className="sidebar-title">Sisaket EMS</h2>
           <p className="sidebar-subtitle">ระบบบริหารจัดการภาวะฉุกเฉิน</p>

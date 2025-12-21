@@ -115,7 +115,7 @@ export default function RequestPage() {
           
           {/* 1. ช่องค้นหาศูนย์พักพิง */}
           <div className="form-group" ref={wrapperRef} style={{ position: 'relative' }}>
-            <label>📍 ค้นหาศูนย์พักพิงของคุณ</label>
+            <label> ค้นหาศูนย์พักพิงของคุณ</label>
             <input 
               type="text"
               className="auth-input"
@@ -159,7 +159,7 @@ export default function RequestPage() {
                   ))
                 ) : (
                   <div style={{ padding: '12px', color: '#666', textAlign: 'center' }}> {/* ✅ แก้สีตรงนี้ด้วย */}
-                    ❌ ไม่พบชื่อศูนย์นี้
+                    ✖ ไม่พบชื่อศูนย์นี้
                   </div>
                 )}
               </div>
@@ -170,7 +170,7 @@ export default function RequestPage() {
 
           {/* 2. เลือกสิ่งของ */}
           <div className="form-group">
-            <label>📦 สิ่งของที่ต้องการเบิก</label>
+            <label> สิ่งของที่ต้องการเบิก</label>
             <select 
               className="auth-input" 
               value={selectedProduct}
@@ -188,7 +188,7 @@ export default function RequestPage() {
 
           {/* 3. ระบุจำนวน */}
           <div className="form-group">
-            <label>🔢 จำนวน</label>
+            <label> จำนวน</label>
             <div style={{ display: 'flex', gap: '10px' }}>
               <input 
                 type="number" 
@@ -214,7 +214,7 @@ export default function RequestPage() {
             style={{ background: '#ef6c00', marginTop: '20px' }}
             disabled={loading}
           >
-            {loading ? '⏳ กำลังส่งข้อมูล...' : '🚀 ส่งคำขอเบิกของ'}
+            {loading ? ' กำลังส่งข้อมูล...' : ' ส่งคำขอเบิกของ'}
           </button>
 
         </form>

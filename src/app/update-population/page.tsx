@@ -123,7 +123,7 @@ export default function UpdatePopulationPage() {
       <div className="auth-card" style={{ maxWidth: '500px', textAlign: 'left' }}>
         
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '10px' }}>👥</div>
+          <div style={{ fontSize: '3rem', marginBottom: '10px' }}>✉</div>
           <h1 className="auth-title" style={{ color: '#3f51b5' }}>อัปเดตยอดผู้อพยพ</h1>
           <p className="auth-subtitle">รายงานสถานการณ์ล่าสุด (Real-time)</p>
         </div>
@@ -132,7 +132,7 @@ export default function UpdatePopulationPage() {
           
           {/* 1. ค้นหาศูนย์ */}
           <div className="form-group" ref={wrapperRef} style={{ position: 'relative' }}>
-            <label style={{ color: '#333' }}>📍 ค้นหาศูนย์พักพิงของคุณ</label>
+            <label style={{ color: '#333' }}> ค้นหาศูนย์พักพิงของคุณ</label>
             <input 
               type="text"
               className="auth-input"
@@ -166,7 +166,7 @@ export default function UpdatePopulationPage() {
                     </div>
                   ))
                 ) : (
-                  <div style={{ padding: '12px', color: '#666', textAlign: 'center' }}>❌ ไม่พบชื่อศูนย์นี้</div>
+                  <div style={{ padding: '12px', color: '#666', textAlign: 'center' }}>✖ ไม่พบชื่อศูนย์นี้</div>
                 )}
               </div>
             )}
@@ -196,7 +196,7 @@ export default function UpdatePopulationPage() {
 
           {/* 2. กรอกตัวเลข */}
           <div className="form-group">
-            <label style={{ color: '#333' }}>🔢 จำนวนผู้พักพิงปัจจุบัน (คน)</label>
+            <label style={{ color: '#333' }}> จำนวนผู้พักพิงปัจจุบัน (คน)</label>
             <input 
               type="number" 
               className="auth-input" 
@@ -215,7 +215,7 @@ export default function UpdatePopulationPage() {
             style={{ background: '#3f51b5', marginTop: '10px' }}
             disabled={loading}
           >
-            {loading ? '⏳ กำลังบันทึก...' : '💾 บันทึกยอดล่าสุด'}
+            {loading ? ' กำลังบันทึก...' : ' บันทึกยอดล่าสุด'}
           </button>
 
         </form>
