@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/layout/Header';
 import Link from 'next/link';
-import '@/styles/dashboard.css'; // เราจะใช้ CSS ของ Dashboard ที่มีอยู่แล้ว
+import '@/styles/dashboard.css';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -14,26 +14,22 @@ export default function Dashboard() {
   });
   const [loading, setLoading] = useState(true);
 
-  // ดึงข้อมูลจริงจากทุกระบบมาแสดง
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [resCenters, resPeople, resNotifs] = await Promise.all([
           fetch('/api/centers').then(res => res.json()),
-          fetch('/api/beneficiaries').then(res => res.json()), // ✅ ตอนนี้ดึงจาก DB แล้ว
+          fetch('/api/beneficiaries').then(res => res.json()),
           fetch('/api/notifications').then(res => res.json())
         ]);
 
-        // นับจำนวนต่างๆ
         const centersCount = Array.isArray(resCenters) ? resCenters.length : 0;
         const peopleCount = Array.isArray(resPeople) ? resPeople.length : 0;
         
-        // นับเฉพาะคำร้องขอความช่วยเหลือ (Request) ที่ยังไม่อ่าน
         const pendingRequests = Array.isArray(resNotifs) 
           ? resNotifs.filter((n: any) => n.type === 'request' && !n.read).length 
           : 0;
 
-        // นับประกาศฉุกเฉิน (Emergency)
         const activeAlerts = Array.isArray(resNotifs)
           ? resNotifs.filter((n: any) => n.type === 'emergency').length
           : 0;
@@ -54,25 +50,10 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // การ์ดแสดงผล (Component ย่อย)
-  const StatCard = ({ title, value, icon, color, link, desc }: any) => (
-    <Link href={link} style={{ textDecoration: 'none' }}>
-      <div className="stat-card" style={{ 
-        background: `linear-gradient(135deg, ${color})`,
-        cursor: 'pointer',
-        transition: 'transform 0.2s'
-      }}>
-        <div className="stat-content">
-          <div className="stat-info">
-            <h3>{title}</h3>
-            <div className="stat-number">{loading ? '...' : value.toLocaleString()}</div>
-            <p className="stat-desc">{desc}</p>
-          </div>
-          <div className="stat-icon">{icon}</div>
-        </div>
-      </div>
-    </Link>
-  );
+  const chartData = useMemo(() => {
+    // Generate some dummy data for the chart
+    return Array.from({ length: 7 }, () => Math.floor(Math.random() * 100));
+  }, []);
 
   return (
     <div className="page-container">
@@ -81,82 +62,202 @@ export default function Dashboard() {
         subtitle={`อัปเดตล่าสุด: ${new Date().toLocaleTimeString('th-TH')}`} 
       />
 
-      {/* Grid การ์ดสถิติ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-        <StatCard 
-          title="ศูนย์พักพิงทั้งหมด" 
-          value={stats.centers} 
-          icon="🏢" 
-          color="#7986cb, #5c6bc0" // สีม่วง
-          link="/centers"
-          desc="จำนวนศูนย์ที่เปิดใช้งาน"
-        />
-        <StatCard 
-          title="ผู้ประสบภัย" 
-          value={stats.people} 
-          icon="👨‍👩‍👧‍👦" 
-          color="#4db6ac, #26a69a" // สีเขียว
-          link="/beneficiaries"
-          desc="ลงทะเบียนเข้าพักแล้ว"
-        />
-        <StatCard 
-          title="คำร้องขอความช่วยเหลือ" 
-          value={stats.requests} 
-          icon="🆘" 
-          color="#ffb74d, #ffa726" // สีส้ม
-          link="/notifications"
-          desc="รอการดำเนินการ"
-        />
-        <StatCard 
-          title="ประกาศฉุกเฉิน" 
-          value={stats.alerts} 
-          icon="📢" 
-          color="#e57373, #ef5350" // สีแดง
-          link="/emergency"
-          desc="แจ้งเตือนภัยพิบัติล่าสุด"
-        />
+      {/* Banner Alert */}
+      <div className="alert-banner">
+        <div className="alert-icon"></div>
+        <div className="alert-content">
+          <h3>ภาพรวมสถานการณ์</h3>
+          <p>มี <strong>12</strong> ศูนย์ที่ต้องการความช่วยเหลือเร่งด่วน</p>
+        </div>
       </div>
 
-      {/* แผนที่หรือกราฟ (ใส่ Placeholder ไว้ก่อน) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
-        {/* กราฟจำลอง */}
-        <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)', minHeight: '300px' }}>
-          <h3 style={{ marginTop: 0 }}>📈 แนวโน้มยอดผู้พักพิง (7 วันล่าสุด)</h3>
-          <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', marginTop: '30px' }}>
-            {/* สร้างกราฟแท่งด้วย CSS ง่ายๆ */}
-            {[40, 60, 45, 80, 70, 90, stats.people > 0 ? stats.people : 100].map((h, i) => (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '10%' }}>
-                <div style={{ width: '100%', height: `${h * 1.5}px`, background: i === 6 ? '#26a69a' : 'rgba(121, 134, 203, 0.3)', borderRadius: '4px 4px 0 0', transition: 'height 0.5s' }}></div>
-                <span style={{ fontSize: '12px', marginTop: '5px', color: 'var(--text-secondary)' }}>
-                  {i === 6 ? 'วันนี้' : `${6-i} วันก่อน`}
-                </span>
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <Link href="/centers" className="stat-card-link">
+          <div className="stat-card bg-purple">
+            <div className="stat-icon"></div>
+            <div className="stat-info">
+              <h4>ศูนย์พักพิงทั้งหมด</h4>
+              <div className="stat-number">{loading ? '...' : stats.centers}</div>
+              <p className="stat-label">แห่ง</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/beneficiaries" className="stat-card-link">
+          <div className="stat-card bg-teal">
+            <div className="stat-icon"></div>
+            <div className="stat-info">
+              <h4>รายการสิ่งของทั้งหมด</h4>
+              <div className="stat-number">{loading ? '...' : stats.people}</div>
+              <p className="stat-label">รายการ</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/notifications" className="stat-card-link">
+          <div className="stat-card bg-red">
+            <div className="stat-icon"></div>
+            <div className="stat-info">
+              <h4>ศูนย์ฉุกเฉิน</h4>
+              <div className="stat-number">{loading ? '...' : stats.alerts}</div>
+              <p className="stat-label">แห่ง วิกฤติ</p>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Inventory Section */}
+      <div className="inventory-section">
+        <h3 className="section-title">สิ่งของที่วิกฤตมากที่สุด</h3>
+        
+        <div className="inventory-grid">
+          <div className="inventory-card critical">
+            <div className="inventory-header">
+              <div className="inventory-icon"></div>
+              <div>
+                <h4>น้ำดื่ม</h4>
+                <div className="inventory-bar">
+                  <div className="inventory-fill critical" style={{width: '60%'}}></div>
+                </div>
               </div>
-            ))}
+            </div>
+            <div className="inventory-stats">
+              <span className="inventory-amount">150 แก้ว</span>
+              <button className="btn-critical">วิกฤติ</button>
+            </div>
+          </div>
+
+          <div className="inventory-card warning">
+            <div className="inventory-header">
+              <div className="inventory-icon"></div>
+              <div>
+                <h4>อาหารแห้ง</h4>
+                <div className="inventory-bar">
+                  <div className="inventory-fill warning" style={{width: '45%'}}></div>
+                </div>
+              </div>
+            </div>
+            <div className="inventory-stats">
+              <span className="inventory-amount">250 แก้ว</span>
+              <button className="btn-warning">เร่งเติมเกลม</button>
+            </div>
+          </div>
+
+          <div className="inventory-card normal">
+            <div className="inventory-header">
+              <div className="inventory-icon"></div>
+              <div>
+                <h4>อาหารแห้ง</h4>
+                <div className="inventory-bar">
+                  <div className="inventory-fill normal" style={{width: '80%'}}></div>
+                </div>
+              </div>
+            </div>
+            <div className="inventory-stats">
+              <span className="inventory-amount">วิกฤติ</span>
+              <span style={{color: '#4ade80'}}></span>
+            </div>
+          </div>
+
+          <div className="inventory-card normal">
+            <div className="inventory-header">
+              <div className="inventory-icon"></div>
+              <div>
+                <h4>ยา</h4>
+                <div className="inventory-bar">
+                  <div className="inventory-fill normal" style={{width: '75%'}}></div>
+                </div>
+              </div>
+            </div>
+            <div className="inventory-stats">
+              <span className="inventory-amount">เร่งเติมเกลม</span>
+              <span style={{color: '#4ade80'}}></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div className="chart-section">
+        <h3 className="section-title">แนวโน้มข้อมูล</h3>
+        <div className="chart-container">
+          <SimpleLineChart data={chartData} />
+        </div>
+      </div>
+
+      {/* Bottom Section */}
+      <div className="bottom-grid">
+        <div className="card-box">
+          <div className="card-header">
+            <div className="card-title">
+              <span className="card-icon"></span>
+              <h3>ดูภาพรวมศูนย์พักพิง</h3>
+            </div>
+            <button className="btn-view">ดูภาพรวมศูนย์พักพิง ▶</button>
           </div>
         </div>
 
-        {/* ทางลัด */}
-        <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-          <h3 style={{ marginTop: 0 }}>⚡ เมนูด่วน</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Link href="/emergency">
-              <button className="btn-menu-shortcut" style={{ width: '100%', padding: '12px', background: 'rgba(239,83,80,0.1)', color: '#ef5350', border: '1px solid #ef5350', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-                🚨 ประกาศภาวะฉุกเฉิน
-              </button>
-            </Link>
-            <Link href="/beneficiaries">
-              <button className="btn-menu-shortcut" style={{ width: '100%', padding: '12px', background: 'var(--bg-main)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '8px', cursor: 'pointer' }}>
-                + ลงทะเบียนคนใหม่
-              </button>
-            </Link>
-            <button 
-              className="btn-menu-shortcut" 
-              style={{ width: '100%', padding: '12px', background: 'var(--bg-main)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '8px', cursor: 'pointer' }}
-              onClick={() => alert('ยังไม่เปิดใช้งาน')}
-            >
-              📄 พิมพ์รายงานสรุป
-            </button>
+        <div className="card-box">
+          <div className="card-header">
+            <div className="card-title">
+              <span className="card-icon"></span>
+              <h3>ดูสต็อคสิ่งของ</h3>
+            </div>
+            <button className="btn-view">ดูสต็อคสิ่งของ ▶</button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type SimpleLineChartProps = {
+  data: number[];
+  labels?: string[];
+  color?: string;
+  height?: number;
+};
+
+function SimpleLineChart({ data, labels = [], color = '#6366f1', height = 120 }: SimpleLineChartProps) {
+  const w = 600;
+  const h = height;
+  const max = Math.max(...data, 1);
+
+  const { pathD, areaD, points } = useMemo(() => {
+    const pts = data.map((v, i) => {
+      const x = (i / Math.max(1, data.length - 1)) * (w - 20) + 10;
+      const y = h - (v / max) * (h - 20) - 10;
+      return { x, y };
+    });
+
+    const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const area = `${path} L ${w - 10} ${h - 8} L 10 ${h - 8} Z`;
+    return { pathD: path, areaD: area, points: pts };
+  }, [data, h, max, w]);
+
+  return (
+    <div className="chart-card">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" className="simple-line-chart">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        <path d={areaD} fill="url(#chartGrad)" />
+        <path d={pathD} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={3.5} fill={color} />
+        ))}
+      </svg>
+
+      <div className="chart-meta">
+        <div className="chart-title">สรุป 7 วัน</div>
+        <div className="chart-sub">
+          {labels.length ? labels[labels.length - 1] : ''}
         </div>
       </div>
     </div>
