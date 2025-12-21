@@ -54,7 +54,7 @@ export default function BeneficiariesPage() {
   return (
     <div className="page-container">
       <Header 
-        title="👥 รายชื่อผู้ประสบภัย" 
+        title=" รายชื่อผู้ประสบภัย" 
         subtitle={`ลงทะเบียนแล้ว ${people.length} คน`}
       />
 
@@ -62,7 +62,7 @@ export default function BeneficiariesPage() {
       <div className="filter-section">
         <div className="filter-group">
           <div className="search-box">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"></span>
             <input 
               type="text" 
               className="search-input-table"
@@ -119,7 +119,7 @@ export default function BeneficiariesPage() {
             ))}
           </tbody>
         </table>
-        {filteredPeople.length === 0 && <div className="no-results">❌ ไม่พบรายชื่อที่ค้นหา</div>}
+        {filteredPeople.length === 0 && <div className="no-results">✖ ไม่พบรายชื่อที่ค้นหา</div>}
       </div>
     </div>
   );

@@ -60,7 +60,7 @@ export default function InventoryPage() {
   return (
     <div className="page-container">
       <Header 
-        title="📦 คลังสินค้าและเวชภัณฑ์" 
+        title=" คลังสินค้าและเวชภัณฑ์" 
         subtitle={`รายการพัสดุทั้งหมด ${products.length} รายการ`} 
       />
 
@@ -68,7 +68,7 @@ export default function InventoryPage() {
       <div className="filter-section">
         <div className="filter-group">
           <div className="search-box">
-             <span className="search-icon">🔍</span>
+             <span className="search-icon"></span>
              <input type="text" className="search-input-table" placeholder="ค้นหาพัสดุ..." />
           </div>
           <select 
@@ -117,12 +117,12 @@ export default function InventoryPage() {
                       padding: '4px 8px', borderRadius: '4px', fontSize: '12px',
                       background: 'var(--hover-color)', color: 'var(--text-secondary)'
                     }}>
-                      {item.category === 'food' ? '🍔 อาหาร' : 
-                       item.category === 'medicine' ? '💊 ยา' : 
-                       item.category === 'equipment' ? '🔧 อุปกรณ์' : '📦 อื่นๆ'}
+                      {item.category === 'food' ? ' อาหาร' : 
+                       item.category === 'medicine' ? ' ยา' : 
+                       item.category === 'equipment' ? ' อุปกรณ์' : ' อื่นๆ'}
                     </span>
                   </td>
-                  <td className="center-location">📍 {item.location}</td>
+                  <td className="center-location"> {item.location}</td>
                   <td className="center-capacity" style={{ fontSize: '1.1rem' }}>
                     {item.quantity.toLocaleString()} {item.unit}
                   </td>
@@ -157,7 +157,7 @@ export default function InventoryPage() {
         
         {products.length === 0 && (
            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-             📦 คลังสินค้าว่างเปล่า (กรุณาเพิ่มสินค้าผ่าน Console หรือรอทีมงานเพิ่มให้)
+              คลังสินค้าว่างเปล่า (กรุณาเพิ่มสินค้าผ่าน Console หรือรอทีมงานเพิ่มให้)
            </div>
         )}
       </div>

@@ -29,7 +29,7 @@ export default function LogsPage() {
 
   return (
     <div className="page-container">
-      <Header title="📜 ประวัติการใช้งานระบบ" subtitle="Activity Logs (100 รายการล่าสุด)" />
+      <Header title=" ประวัติการใช้งานระบบ" subtitle="Activity Logs (100 รายการล่าสุด)" />
 
       <div className="table-container">
         <table className="data-table">
