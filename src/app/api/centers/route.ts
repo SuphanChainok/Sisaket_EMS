@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Center from '@/models/Center';
-import { createLog } from '@/lib/logger'; // ✅ 1. อย่าลืม Import ตัวนี้
+import { createLog } from '@/lib/logger'; // ✅ Import
 
 // 🟢 GET: ดึงข้อมูลศูนย์ทั้งหมด
 export async function GET() {
@@ -63,15 +63,15 @@ export async function POST(req: Request) {
       if (e.code !== 11000) throw e; 
     }
 
-    // ✅ 2. เพิ่ม Log: บันทึกว่ามีการเพิ่มศูนย์
-    // (ตัดชื่อมาแสดงแค่ 5 อันแรก ถ้าเยอะเกินให้ใส่ ...)
+    // ✅ 2. เพิ่ม Log
     const count = validData.length;
     const sampleNames = validData.slice(0, 5).map(d => d.name).join(', ');
     const logDesc = count > 5 
       ? `เพิ่ม/นำเข้าศูนย์ ${count} แห่ง: ${sampleNames} ...`
       : `เพิ่ม/นำเข้าศูนย์ ${count} แห่ง: ${sampleNames}`;
 
-    await createLog('CREATE_CENTER', logDesc);
+    // (แก้ไขถูกต้องแล้ว)
+    await createLog('Admin', 'CREATE_CENTER', logDesc);
 
     return NextResponse.json({ 
       message: `นำเข้าข้อมูลสำเร็จ ${validData.length} รายการ`
@@ -94,15 +94,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Center ID is required' }, { status: 400 });
     }
 
-    // ต้องใช้ findByIdAndDelete เพื่อให้มัน Return ค่าที่ถูกลบกลับมา (จะได้เอาชื่อไป Log ถูก)
     const deletedCenter = await Center.findByIdAndDelete(id);
 
     if (!deletedCenter) {
       return NextResponse.json({ error: 'Center not found' }, { status: 404 });
     }
 
-    // ✅ 3. เพิ่ม Log: บันทึกว่าลบศูนย์ไหนไป
-    await createLog('DELETE_CENTER', `ลบศูนย์พักพิง: ${deletedCenter.name}`);
+    // ✅ แก้ไขตรงนี้: เพิ่ม 'Admin' เข้าไปเป็น Argument แรก
+    await createLog('Admin', 'DELETE_CENTER', `ลบศูนย์พักพิง: ${deletedCenter.name}`);
 
     return NextResponse.json({ message: 'Center deleted successfully' });
   } catch (error) {
