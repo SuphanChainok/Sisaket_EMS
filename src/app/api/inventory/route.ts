@@ -1,51 +1,101 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import Product from '@/models/Product';
-import Notification from '@/models/Notification'; // เรียกใช้ Model แจ้งเตือน
+import Inventory from '@/models/Inventory';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-// 🟢 GET: ดูของในคลังทั้งหมด
 export async function GET() {
-  await dbConnect();
   try {
-    const products = await Product.find({}).sort({ quantity: 1 }); // เรียงตามของที่เหลือน้อยสุดขึ้นก่อน
-    return NextResponse.json(products);
+    await dbConnect();
+    const items = await Inventory.find({}).sort({ category: 1, name: 1 });
+    return NextResponse.json(items);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 });
   }
 }
 
-// 🟡 POST: เพิ่มสินค้าใหม่ หรือ ปรับยอดสินค้า
 export async function POST(req: Request) {
-  await dbConnect();
+  // ตรวจสอบสิทธิ์ก่อนทำอะไรทั้งสิ้น
+  // NOTE: client must include cookies when calling this API (fetch with `credentials: 'include'` or axios `withCredentials: true`).
+
+  // Inspect incoming cookie header for debugging
+  const cookieHeader = req.headers.get('cookie');
+  const origin = req.headers.get('origin') || req.headers.get('referer') || 'unknown';
+
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.debug('inventory POST incoming cookies:', cookieHeader);
+    // eslint-disable-next-line no-console
+    console.debug('inventory POST origin:', origin);
+  }
+
+  if (!cookieHeader) {
+    return NextResponse.json({ error: '⛔ ไม่มี cookie header ในคำขอ — ตรวจสอบว่า client เรียก API พร้อม cookies (fetch(..., { credentials: "include" }) หรือ axios withCredentials: true)' }, { status: 403 });
+  }
+
+  // Explicitly pass the NEXTAUTH_SECRET to ensure token can be decoded
+  const secret = process.env.NEXTAUTH_SECRET || 'secret-key-sisaket-ems';
+
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.debug('NEXTAUTH_SECRET present (masked):', Boolean(process.env.NEXTAUTH_SECRET));
+  }
+
+  let token = null;
   try {
+    token = await getToken({ req: req as unknown as NextRequest, secret });
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('getToken threw error:', err?.message || err);
+    }
+  }
+
+  // Helpful debug info in development
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.debug('inventory POST token:', JSON.stringify(token));
+  }
+
+  if (!token) {
+    return NextResponse.json({ error: '⛔ ไม่มี token (cookies ถูกส่งมา แต่ session อาจหมดอายุหรือ NEXTAUTH_SECRET ผิดค่าหรือขาดหาย)' }, { status: 403 });
+  }
+
+  if (token.role !== 'admin') {
+    return NextResponse.json({ error: '⛔ ไม่มีสิทธิ์ (ต้องเป็น Admin)' }, { status: 403 });
+  }
+
+  try {
+    await dbConnect();
     const body = await req.json();
-    
-    // กรณี 1: สร้างสินค้าใหม่
-    if (!body._id) {
-      const newProduct = await Product.create(body);
-      return NextResponse.json(newProduct);
+
+    // Update stock ถ้ามี _id
+    if (body._id) {
+      const { _id, quantity } = body;
+      const updatedItem = await Inventory.findByIdAndUpdate(
+        _id,
+        { quantity },
+        { new: true }
+      );
+      return NextResponse.json(updatedItem);
     }
 
-    // กรณี 2: อัปเดตจำนวนสินค้า (เช่น เบิกของ / เติมของ)
-    const product = await Product.findById(body._id);
-    if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-
-    product.quantity = body.quantity;
-    product.updatedAt = new Date();
-    await product.save();
-
-    // 🔥 เช็คสต็อกอัตโนมัติ: ถ้าของน้อยกว่าเกณฑ์ ให้แจ้งเตือน!
-    if (product.quantity <= product.minLevel) {
-      await Notification.create({
-        type: 'stock',
-        title: `📦 สต็อกเตือนภัย: ${product.name}`,
-        message: `เหลือเพียง ${product.quantity} ${product.unit} (ต่ำกว่าเกณฑ์ ${product.minLevel}) กรุณาเติมด่วน!`,
-        read: false
-      });
+    // Create new item
+    if (!body.name || !body.category) {
+      return NextResponse.json({ error: 'กรุณากรอกชื่อและหมวดหมู่' }, { status: 400 });
     }
 
-    return NextResponse.json(product);
+    const newItem = await Inventory.create({
+      name: body.name,
+      category: body.category,
+      quantity: body.quantity || 0,
+      unit: body.unit || 'ชิ้น',
+      minLevel: body.minLevel || 10,
+      location: body.location || '-'
+    });
+
+    return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update inventory' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process' }, { status: 500 });
   }
 }

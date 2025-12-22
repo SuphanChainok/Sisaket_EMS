@@ -1,17 +1,17 @@
-import Log from '@/models/Log';
 import dbConnect from '@/lib/mongodb';
+import Log from '@/models/Log';
 
-export async function createLog(action: string, description: string, user: string = 'Admin Officer') {
+export async function createLog(user: string, action: string, description: string) {
   try {
-    await dbConnect(); // กันเหนียว เผื่อ connection หลุด
+    await dbConnect();
     await Log.create({
+      user,
       action,
       description,
-      user
+      timestamp: new Date()
     });
-    console.log(`[LOG] ${action}: ${description}`);
   } catch (error) {
-    console.error('Failed to create log:', error);
-    // ไม่ต้อง throw error ออกไป เพราะ Log พังไม่ควรทำให้ระบบหลักพัง
+    console.error("Logger Error:", error);
+    // ไม่ต้อง Throw error เพราะเราไม่อยากให้ Log พังแล้วระบบหลักพังไปด้วย
   }
 }

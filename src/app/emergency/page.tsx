@@ -12,6 +12,10 @@ interface Alert {
 }
 
 export default function EmergencyPage() {
+  // ✅ 1. เพิ่ม State สำหรับ Modal
+  const [showModal, setShowModal] = useState(false);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+
   const [alerts, setAlerts] = useState<Alert[]>([
     {
       id: 1,
@@ -41,19 +45,26 @@ export default function EmergencyPage() {
     }
   }, [currentLevel]);
 
-  const handleBroadcast = () => {
-    const msg = prompt('ระบุข้อความแจ้งเตือนฉุกเฉิน (SMS/Line):');
-    if (msg) {
-      alert(`📡 ส่งข้อความ: "${msg}" \nไปยังหัวหน้าศูนย์ 944 ท่านเรียบร้อยแล้ว!`);
+  // ✅ 2. ปรับฟังก์ชันส่งข้อความ (ไม่ต้องใช้ prompt แล้ว)
+  const submitBroadcast = () => {
+    if (broadcastMessage.trim()) {
+      // จำลองการส่ง
+      // alert(`📡 ส่งข้อความ: "${broadcastMessage}" \nไปยังหัวหน้าศูนย์ 944 ท่านเรียบร้อยแล้ว!`); 
+      
       const newAlert = {
         id: Date.now(),
         title: 'ประกาศฉุกเฉินจากส่วนกลาง',
         level: 'critical' as const,
         type: 'broadcast',
         timestamp: new Date().toISOString(),
-        message: msg
+        message: broadcastMessage
       };
+      
       setAlerts([newAlert, ...alerts]);
+      
+      // Reset และปิด Modal
+      setBroadcastMessage('');
+      setShowModal(false);
     }
   };
 
@@ -151,7 +162,12 @@ export default function EmergencyPage() {
             justifyContent: 'center',
             fontSize: '2rem',
           }}>
-            
+             <img 
+               src="/ssk-logo.jpg" 
+               alt="Logo" 
+               style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '16px' }}
+               onError={(e) => e.currentTarget.style.display = 'none'}
+             />
           </div>
           <div>
             <h1 style={{ 
@@ -343,7 +359,8 @@ export default function EmergencyPage() {
             </p>
             
             <button 
-              onClick={handleBroadcast}
+              // ✅ 3. เปลี่ยน Event onClick ให้เปิด Modal แทน
+              onClick={() => setShowModal(true)}
               style={{ 
                 background: 'white', 
                 color: '#7c3aed', 
@@ -554,6 +571,89 @@ export default function EmergencyPage() {
           )}
         </div>
       </div>
+
+      {/* ✅ 4. Modal UI (ส่วนที่เพิ่มเข้ามา) */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, width: '100%', height: '100%',
+          background: 'rgba(0, 0, 0, 0.7)', // พื้นหลังมืด
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 999
+        }} onClick={() => setShowModal(false)}>
+          <div style={{
+            background: '#1a1a1a', // ธีมมืด
+            padding: '30px',
+            borderRadius: '24px',
+            width: '90%',
+            maxWidth: '500px',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          }} onClick={e => e.stopPropagation()}>
+            
+            <h2 style={{ color: 'white', marginTop: 0, fontSize: '1.5rem' }}>📢 ระบุข้อความแจ้งเตือนฉุกเฉิน</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '20px' }}>
+              ข้อความนี้จะถูกส่งไปยังหัวหน้าศูนย์ 944 ท่าน ผ่าน SMS และ LINE ทันที
+            </p>
+
+            <textarea
+              value={broadcastMessage}
+              onChange={(e) => setBroadcastMessage(e.target.value)}
+              placeholder="พิมพ์ข้อความแจ้งเตือนที่นี่..."
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '15px',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                fontSize: '1rem',
+                resize: 'none',
+                marginBottom: '20px',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setShowModal(false)}
+                style={{
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={submitBroadcast}
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
+                }}
+              >
+                🚀 ส่งข้อความทันที
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

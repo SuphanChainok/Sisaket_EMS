@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // ✅ ใช้ Link ของ Next.js
 import '@/styles/auth.css';
 
 interface Center { _id: string; name: string; }
 interface Product { _id: string; name: string; unit: string; quantity: number; }
 
 export default function RequestPage() {
-  const router = useRouter();
   const [centers, setCenters] = useState<Center[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   
@@ -94,8 +93,8 @@ export default function RequestPage() {
       setCenterSearch('');
       setSelectedCenterId('');
 
-    } catch (error) {
-      alert('❌ เกิดข้อผิดพลาด: ' + error);
+    } catch (error: any) {
+      alert('❌ เกิดข้อผิดพลาด: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -115,7 +114,7 @@ export default function RequestPage() {
           
           {/* 1. ช่องค้นหาศูนย์พักพิง */}
           <div className="form-group" ref={wrapperRef} style={{ position: 'relative' }}>
-            <label> ค้นหาศูนย์พักพิงของคุณ</label>
+            <label style={{ color: '#333' }}> ค้นหาศูนย์พักพิงของคุณ</label>
             <input 
               type="text"
               className="auth-input"
@@ -124,6 +123,7 @@ export default function RequestPage() {
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setShowCenterList(true)}
               required
+              style={{ color: '#333' }}
             />
             
             {/* รายการ Dropdown */}
@@ -149,7 +149,7 @@ export default function RequestPage() {
                         cursor: 'pointer',
                         borderBottom: '1px solid #eee',
                         transition: 'background 0.2s',
-                        color: '#333' // ✅ แก้ตรงนี้: บังคับตัวหนังสือสีเข้ม
+                        color: '#333'
                       }}
                       onMouseOver={(e) => e.currentTarget.style.background = '#f5f5f5'}
                       onMouseOut={(e) => e.currentTarget.style.background = 'white'}
@@ -158,7 +158,7 @@ export default function RequestPage() {
                     </div>
                   ))
                 ) : (
-                  <div style={{ padding: '12px', color: '#666', textAlign: 'center' }}> {/* ✅ แก้สีตรงนี้ด้วย */}
+                  <div style={{ padding: '12px', color: '#666', textAlign: 'center' }}>
                     ✖ ไม่พบชื่อศูนย์นี้
                   </div>
                 )}
@@ -170,12 +170,13 @@ export default function RequestPage() {
 
           {/* 2. เลือกสิ่งของ */}
           <div className="form-group">
-            <label> สิ่งของที่ต้องการเบิก</label>
+            <label style={{ color: '#333' }}> สิ่งของที่ต้องการเบิก</label>
             <select 
               className="auth-input" 
               value={selectedProduct}
               onChange={e => setSelectedProduct(e.target.value)}
               required
+              style={{ color: '#333' }}
             >
               <option value="">-- เลือกรายการ --</option>
               {products.map(p => (
@@ -188,7 +189,7 @@ export default function RequestPage() {
 
           {/* 3. ระบุจำนวน */}
           <div className="form-group">
-            <label> จำนวน</label>
+            <label style={{ color: '#333' }}> จำนวน</label>
             <div style={{ display: 'flex', gap: '10px' }}>
               <input 
                 type="number" 
@@ -197,11 +198,11 @@ export default function RequestPage() {
                 value={quantity}
                 onChange={e => setQuantity(Number(e.target.value))}
                 required 
-                style={{ flex: 1 }}
+                style={{ flex: 1, color: '#333' }}
               />
               <div style={{ 
                 display: 'flex', alignItems: 'center', background: '#eee', 
-                padding: '0 15px', borderRadius: '8px', color: '#333' // ✅ แก้สีหน่วยนับให้เข้มขึ้น
+                padding: '0 15px', borderRadius: '8px', color: '#333'
               }}>
                 {products.find(p => p._id === selectedProduct)?.unit || 'หน่วย'}
               </div>
@@ -219,10 +220,11 @@ export default function RequestPage() {
 
         </form>
 
+        {/* ✅ ลิงก์กลับหน้า Dashboard เจ้าหน้าที่ */}
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <a href="/login" style={{ fontSize: '0.9rem', color: '#666', textDecoration: 'none' }}>
-            ← กลับไปหน้าเจ้าหน้าที่ (Admin)
-          </a>
+          <Link href="/staff" style={{ fontSize: '0.9rem', color: '#666', textDecoration: 'none' }}>
+            ← กลับหน้า Dashboard เจ้าหน้าที่
+          </Link>
         </div>
 
       </div>

@@ -1,65 +1,59 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Transfer from '@/models/Transfer';
-import Product from '@/models/Product';
-import Notification from '@/models/Notification';
+import Inventory from '@/models/Inventory';
+import { createLog } from '@/lib/logger'; // ✅ 1. Import ตัวจดบันทึก
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   await dbConnect();
   const { id } = params;
-  const { action } = await req.json(); // action = 'approve' | 'reject'
 
   try {
+    // 1. หาเอกสารคำขอ
     const transfer = await Transfer.findById(id);
-    if (!transfer) return NextResponse.json({ error: 'Transfer not found' }, { status: 404 });
+    if (!transfer) return NextResponse.json({ error: 'ไม่พบคำขอ' }, { status: 404 });
 
     if (transfer.status !== 'pending') {
-      return NextResponse.json({ error: 'ใบงานนี้ถูกดำเนินการไปแล้ว' }, { status: 400 });
+      return NextResponse.json({ error: 'คำขอนี้ถูกจัดการไปแล้ว' }, { status: 400 });
     }
 
-    if (action === 'reject') {
-      transfer.status = 'rejected';
-      await transfer.save();
-      return NextResponse.json({ message: 'ปฏิเสธคำขอแล้ว' });
-    }
-
-    // กรณีอนุมัติ (Approve) -> ต้องตัดสต็อกจริง
-    if (action === 'approve') {
-      // 1. วนลูปเช็คของทุกชิ้นในใบเบิก
-      for (const item of transfer.items) {
-        const product = await Product.findById(item.productId);
-        
-        if (!product || product.quantity < item.quantity) {
-          return NextResponse.json({ 
-            error: `สต็อกไม่พอ: ${item.productName} (มี ${product?.quantity || 0}, ขอ ${item.quantity})` 
-          }, { status: 400 });
-        }
-
-        // 2. ตัดสต็อก
-        product.quantity -= item.quantity;
-        await product.save();
+    // 2. 🟢 ตัดสต็อกสินค้า (Real Inventory Logic)
+    for (const item of transfer.items) {
+      const product = await Inventory.findById(item.productId);
+      
+      if (!product) {
+        return NextResponse.json({ error: `ไม่พบสินค้า ID: ${item.productId} ในคลัง` }, { status: 400 });
       }
 
-      // 3. อัปเดตสถานะใบเบิก
-      transfer.status = 'approved';
-      transfer.approvedBy = 'Admin Officer'; // (Mock)
-      transfer.updatedAt = new Date();
-      await transfer.save();
+      if (product.quantity < item.quantity) {
+        return NextResponse.json({ 
+          error: `สินค้า "${product.name}" มีไม่พอ (ขอ: ${item.quantity}, มี: ${product.quantity})` 
+        }, { status: 400 });
+      }
 
-      // 4. สร้างแจ้งเตือนเข้าระบบ
-      await Notification.create({
-        type: 'system',
-        title: '✅ อนุมัติเบิกจ่ายสำเร็จ',
-        message: `รายการ ${transfer.docNo} สำหรับ ${transfer.destination} ได้รับการอนุมัติแล้ว`,
-        read: false
-      });
-
-      return NextResponse.json({ message: 'อนุมัติและตัดสต็อกเรียบร้อย' });
+      // ตัดยอด
+      product.quantity -= item.quantity;
+      await product.save();
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    // 3. อัปเดตสถานะคำขอ
+    transfer.status = 'approved';
+    transfer.approvedBy = 'Admin'; // (ถ้ามี session ส่งมา สามารถแก้ตรงนี้เป็นชื่อคนกดได้)
+    transfer.approvedDate = new Date();
+    
+    await transfer.save();
 
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    // ✅ 4. บันทึก Log ลงระบบ (ส่วนที่เพิ่มเข้ามา)
+    await createLog(
+      'Admin', 
+      'APPROVE_TRANSFER', 
+      `อนุมัติใบเบิก ${transfer.docNo} (${transfer.destination}) - ตัดสต็อกสำเร็จ`
+    );
+
+    return NextResponse.json({ message: 'อนุมัติและตัดสต็อกเรียบร้อย', transfer });
+
+  } catch (error: any) {
+    console.error("Approve Error:", error);
+    return NextResponse.json({ error: error.message || 'เกิดข้อผิดพลาดในการอนุมัติ' }, { status: 500 });
   }
 }

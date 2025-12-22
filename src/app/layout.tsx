@@ -2,7 +2,8 @@ import './globals.css';
 import '@/styles/layout.css';
 import { Prompt } from 'next/font/google';
 import { ThemeProvider } from '@/context/ThemeContext';
-import LayoutWrapper from '@/components/layout/LayoutWrapper'; // ✅ เรียกใช้ตัวที่เราเพิ่งสร้าง
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
+import Providers from '@/components/Providers'; // ✅ สำคัญ: ต้อง Import มา
 
 const prompt = Prompt({
   subsets: ['thai', 'latin'],
@@ -23,12 +24,14 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={prompt.className}>
-        <ThemeProvider>
-          {/* ✅ ส่งต่อให้ LayoutWrapper จัดการเรื่อง Sidebar/Footer */}
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
-        </ThemeProvider>
+        {/* ✅ SessionProvider (Providers) ต้องอยู่ชั้นนอกสุดใน body เสมอ */}
+        <Providers>
+          <ThemeProvider>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
