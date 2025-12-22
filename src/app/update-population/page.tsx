@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import '@/styles/auth.css'; // ใช้ CSS ชุดเดิมเพื่อให้ Theme เหมือนกัน
+import '@/styles/auth.css';
 
 interface Center {
   _id: string;
@@ -17,8 +17,8 @@ export default function UpdatePopulationPage() {
   
   // State สำหรับฟอร์ม
   const [selectedCenterId, setSelectedCenterId] = useState('');
-  const [population, setPopulation] = useState<number | ''>(''); // ยอดคนปัจจุบัน
-  const [capacity, setCapacity] = useState(0); // ความจุ (เอาไว้โชว์เทียบ)
+  const [population, setPopulation] = useState<number | ''>(''); 
+  const [capacity, setCapacity] = useState(0); 
   const [loading, setLoading] = useState(false);
 
   // State สำหรับค้นหา (Searchable Dropdown)
@@ -35,7 +35,6 @@ export default function UpdatePopulationPage() {
       setFilteredCenters(data);
     });
 
-    // คลิกนอกกรอบเพื่อปิด Dropdown
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setShowCenterList(false);
@@ -48,8 +47,8 @@ export default function UpdatePopulationPage() {
   // ฟังก์ชันพิมพ์ค้นหา
   const handleSearchChange = (text: string) => {
     setCenterSearch(text);
-    setSelectedCenterId(''); // ถ้าพิมพ์ใหม่ ให้เคลียร์ค่าเดิม
-    setPopulation(''); // เคลียร์ตัวเลข
+    setSelectedCenterId('');
+    setPopulation(''); 
     setShowCenterList(true);
     
     const filtered = centers.filter(c => 
@@ -62,11 +61,8 @@ export default function UpdatePopulationPage() {
   const selectCenter = (center: Center) => {
     setCenterSearch(center.name);
     setSelectedCenterId(center._id);
-    
-    // ✅ UX: ดึงยอดเดิมมาใส่ให้เลย ไม่ต้องพิมพ์ใหม่
     setPopulation(center.population); 
     setCapacity(center.capacity);
-    
     setShowCenterList(false);
   };
 
@@ -77,7 +73,7 @@ export default function UpdatePopulationPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/centers/update-population', { // เรียกใช้ API ที่คุณเพิ่งทำ
+      const res = await fetch('/api/centers/update-population', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,7 +88,6 @@ export default function UpdatePopulationPage() {
 
       alert(`✅ อัปเดตยอดสำเร็จ! \nศูนย์: ${data.center} \nยอดปัจจุบัน: ${data.population} คน`);
       
-      // อัปเดตข้อมูลใน State หลักด้วย (เผื่อเขาจะแก้ซ้ำ)
       const updatedCenters = centers.map(c => 
         c._id === selectedCenterId ? { ...c, population: Number(population) } : c
       );
@@ -106,20 +101,18 @@ export default function UpdatePopulationPage() {
     }
   };
 
-  // คำนวณเปอร์เซ็นต์ความหนาแน่น (Progress Bar)
   const occupancyRate = capacity > 0 && typeof population === 'number' 
     ? Math.min(100, (population / capacity) * 100) 
     : 0;
 
-  // เลือกสี Progress Bar
   const getProgressColor = () => {
-    if (occupancyRate >= 90) return '#ef5350'; // แดง (วิกฤต)
-    if (occupancyRate >= 70) return '#ffa726'; // ส้ม (เริ่มแน่น)
-    return '#66bb6a'; // เขียว (สบายๆ)
+    if (occupancyRate >= 90) return '#ef5350'; 
+    if (occupancyRate >= 70) return '#ffa726'; 
+    return '#66bb6a'; 
   };
 
   return (
-    <div className="auth-container" style={{ background: '#e8eaf6' }}> {/* พื้นหลังโทนน้ำเงินอ่อน */}
+    <div className="auth-container" style={{ background: '#e8eaf6' }}>
       <div className="auth-card" style={{ maxWidth: '500px', textAlign: 'left' }}>
         
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
@@ -157,7 +150,7 @@ export default function UpdatePopulationPage() {
                       onClick={() => selectCenter(c)}
                       style={{
                         padding: '12px 16px', cursor: 'pointer',
-                        borderBottom: '1px solid #eee', color: '#333' // ตัวหนังสือสีเข้ม
+                        borderBottom: '1px solid #eee', color: '#333'
                       }}
                       onMouseOver={(e) => e.currentTarget.style.background = '#f5f5f5'}
                       onMouseOut={(e) => e.currentTarget.style.background = 'white'}
@@ -172,7 +165,6 @@ export default function UpdatePopulationPage() {
             )}
           </div>
 
-          {/* แสดงสถานะปัจจุบันเมื่อเลือกศูนย์แล้ว */}
           {selectedCenterId && (
             <div style={{ 
               background: '#f8f9fa', padding: '15px', borderRadius: '8px', 
@@ -182,7 +174,6 @@ export default function UpdatePopulationPage() {
                 <span>ความจุทั้งหมด: {capacity.toLocaleString()} คน</span>
                 <span>หนาแน่น: {occupancyRate.toFixed(1)}%</span>
               </div>
-              {/* Progress Bar */}
               <div style={{ height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{ 
                   width: `${occupancyRate}%`, 
@@ -220,9 +211,10 @@ export default function UpdatePopulationPage() {
 
         </form>
 
+        {/* ✅ ส่วนที่แก้ไข: ลิงก์กลับหน้า Staff Dashboard */}
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <Link href="/" style={{ fontSize: '0.9rem', color: '#666', textDecoration: 'none' }}>
-            ← กลับหน้าหลัก
+          <Link href="/staff" style={{ fontSize: '0.9rem', color: '#666', textDecoration: 'none' }}>
+            ← กลับหน้า Dashboard เจ้าหน้าที่
           </Link>
         </div>
 

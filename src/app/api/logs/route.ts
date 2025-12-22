@@ -5,10 +5,10 @@ import Log from '@/models/Log';
 export async function GET() {
   await dbConnect();
   try {
-    // ดึง 100 รายการล่าสุด
+    // ดึง 100 รายการล่าสุด (ใหม่สุดขึ้นก่อน)
     const logs = await Log.find({}).sort({ timestamp: -1 }).limit(100);
     return NextResponse.json(logs);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch logs' }, { status: 500 });
   }
 }

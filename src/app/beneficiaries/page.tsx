@@ -1,30 +1,83 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Beneficiary } from '@/types';
+import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/layout/Header';
-import '@/styles/table.css'; // ✅ ใช้ CSS ตารางอันสวยที่เราเพิ่งแก้
+import '@/styles/table.css';
+
+// Type Definitions
+interface Beneficiary {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  gender: string;
+  centerName: string;
+  status: string;
+  chronicDisease?: string;
+}
+
+interface Center {
+  _id: string;
+  name: string;
+}
 
 export default function BeneficiariesPage() {
   const [people, setPeople] = useState<Beneficiary[]>([]);
+  const [centers, setCenters] = useState<Center[]>([]); 
   const [filteredPeople, setFilteredPeople] = useState<Beneficiary[]>([]);
+  
+  // Search & Filter State (สำหรับตารางหลัก)
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'manual' | 'import'>('manual');
+  
+  // Form State
+  const [formData, setFormData] = useState({
+    firstName: '', lastName: '', age: '', gender: 'male',
+    centerName: '', status: 'normal', chronicDisease: ''
+  });
+
+  // ✅ 1. เพิ่ม State สำหรับ Searchable Dropdown ใน Modal
+  const [centerSearch, setCenterSearch] = useState(''); // ข้อความที่พิมพ์ในช่องศูนย์
+  const [showCenterList, setShowCenterList] = useState(false); // ควบคุมการเปิด/ปิดลิสต์
+  const [filteredCenters, setFilteredCenters] = useState<Center[]>([]); // รายชื่อศูนย์ที่กรองแล้ว
+  const wrapperRef = useRef<HTMLDivElement>(null); // เอาไว้เช็คว่าคลิกนอกกรอบไหม
+
+  // โหลดข้อมูลเริ่มต้น
   useEffect(() => {
-    // โหลดข้อมูลจาก API
-    fetch('/api/beneficiaries')
-      .then(res => res.json())
-      .then(data => {
-        setPeople(data);
-        setFilteredPeople(data);
-      });
+    fetchData();
+    
+    // โหลดรายชื่อศูนย์พักพิง
+    fetch('/api/centers').then(res => res.json()).then(data => {
+      setCenters(data);
+      setFilteredCenters(data); // เริ่มต้นให้แสดงทั้งหมด
+    }).catch(() => {});
+
+    // Event Listener: คลิกที่อื่นเพื่อปิด Dropdown
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowCenterList(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ฟังก์ชันกรองข้อมูล (Search & Filter)
+  const fetchData = async () => {
+    const res = await fetch('/api/beneficiaries');
+    const data = await res.json();
+    if(Array.isArray(data)) {
+        setPeople(data);
+        setFilteredPeople(data);
+    }
+  };
+
+  // Filter Logic (ตารางหลัก)
   useEffect(() => {
     let result = [...people];
-
     if (searchText) {
       const k = searchText.toLowerCase();
       result = result.filter(p => 
@@ -33,15 +86,93 @@ export default function BeneficiariesPage() {
         p.centerName?.toLowerCase().includes(k)
       );
     }
-
     if (statusFilter !== 'all') {
       result = result.filter(p => p.status === statusFilter);
     }
-
     setFilteredPeople(result);
   }, [people, searchText, statusFilter]);
 
-  // Badge สีตามสุขภาพ
+  // ✅ ฟังก์ชันพิมพ์ค้นหาศูนย์ใน Modal
+  const handleCenterSearch = (text: string) => {
+    setCenterSearch(text);
+    setFormData({ ...formData, centerName: '' }); // ถ้าพิมพ์ใหม่ ให้เคลียร์ค่าที่เลือกไว้ก่อน (กันสับสน)
+    setShowCenterList(true);
+    
+    const filtered = centers.filter(c => 
+      c.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredCenters(filtered);
+  };
+
+  // ✅ ฟังก์ชันเลือกศูนย์
+  const selectCenter = (center: Center) => {
+    setCenterSearch(center.name);
+    setFormData({ ...formData, centerName: center.name });
+    setShowCenterList(false);
+  };
+
+  // Handle Form Submit (Manual Add)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // ตรวจสอบว่าเลือกศูนย์หรือยัง (ใช้ค่าจาก formData.centerName เป็นหลัก)
+    if(!formData.centerName) {
+      // กรณี user พิมพ์ชื่อศูนย์ถูกต้องเป๊ะๆ แต่ไม่ได้กดเลือกจาก Dropdown เราจะอนุโลมให้
+      const match = centers.find(c => c.name === centerSearch);
+      if (match) {
+        formData.centerName = match.name;
+      } else {
+        return alert('❌ กรุณาเลือกศูนย์พักพิงจากรายการ');
+      }
+    }
+
+    const res = await fetch('/api/beneficiaries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    if (res.ok) {
+      alert('✅ ลงทะเบียนสำเร็จ');
+      setShowModal(false);
+      // Reset Form
+      setFormData({ firstName: '', lastName: '', age: '', gender: 'male', centerName: '', status: 'normal', chronicDisease: '' });
+      setCenterSearch(''); // Reset Search
+      fetchData();
+    } else {
+      alert('❌ เกิดข้อผิดพลาด');
+    }
+  };
+
+  // Handle File Upload (JSON Import)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (!Array.isArray(json)) throw new Error('Format ไม่ถูกต้อง (ต้องเป็น Array)');
+
+        const res = await fetch('/api/beneficiaries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+        });
+
+        if (res.ok) {
+          alert(`✅ นำเข้าข้อมูลสำเร็จ ${json.length} รายการ`);
+          setShowModal(false);
+          fetchData();
+        }
+      } catch (error) {
+        alert('❌ ไฟล์ JSON ไม่ถูกต้อง');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'normal': return <span className="status-badge active" style={{background: 'rgba(38,166,154,0.1)', color:'#26a69a'}}>ปกติ</span>;
@@ -53,25 +184,19 @@ export default function BeneficiariesPage() {
 
   return (
     <div className="page-container">
-      <Header 
-        title=" รายชื่อผู้ประสบภัย" 
-        subtitle={`ลงทะเบียนแล้ว ${people.length} คน`}
-      />
+      <Header title=" รายชื่อผู้ประสบภัย" subtitle={`ลงทะเบียนแล้ว ${people.length} คน`} />
 
-      {/* Filter Section */}
+      {/* Filter Section (ตารางหลัก) */}
       <div className="filter-section">
         <div className="filter-group">
           <div className="search-box">
-            <span className="search-icon"></span>
-            <input 
-              type="text" 
-              className="search-input-table"
-              placeholder="ค้นหา (ชื่อ, นามสกุล, ศูนย์พักพิง)"
-              value={searchText}
-              onChange={e => setSearchText(e.target.value)}
-            />
+             <span className="search-icon">🔍</span>
+             <input 
+               type="text" className="search-input-table"
+               placeholder="ค้นหา (ชื่อ, นามสกุล, ศูนย์พักพิง)"
+               value={searchText} onChange={e => setSearchText(e.target.value)}
+             />
           </div>
-
           <select className="filter-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="all">สุขภาพทั้งหมด</option>
             <option value="normal">ร่างกายปกติ</option>
@@ -79,9 +204,8 @@ export default function BeneficiariesPage() {
             <option value="disabled">ผู้พิการ/ติดเตียง</option>
           </select>
         </div>
-
-        <button className="btn-import">
-           + ลงทะเบียนรายใหม่
+        <button className="btn-import" onClick={() => setShowModal(true)}>
+           + ลงทะเบียน / Import
         </button>
       </div>
 
@@ -94,33 +218,183 @@ export default function BeneficiariesPage() {
               <th>อายุ / เพศ</th>
               <th>ศูนย์พักพิง</th>
               <th>สถานะสุขภาพ</th>
-              <th>หมายเหตุ (โรคประจำตัว)</th>
-              <th>จัดการ</th>
+              <th>หมายเหตุ</th>
             </tr>
           </thead>
           <tbody>
             {filteredPeople.map((person) => (
               <tr key={person._id}>
-                <td>
-                    <div style={{fontWeight: 'bold'}}>{person.firstName} {person.lastName}</div>
-                </td>
+                <td><div style={{fontWeight: 'bold'}}>{person.firstName} {person.lastName}</div></td>
                 <td>{person.age} ปี / {person.gender === 'male' ? 'ชาย' : 'หญิง'}</td>
                 <td>📍 {person.centerName}</td>
                 <td>{getStatusBadge(person.status)}</td>
-                <td style={{color: 'var(--text-secondary)'}}>
-                    {person.chronicDisease || '-'}
-                </td>
-                <td>
-                    <div className="action-buttons">
-                        <button className="btn-action btn-edit">✏️</button>
-                    </div>
-                </td>
+                <td style={{color: 'var(--text-secondary)'}}>{person.chronicDisease || '-'}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {filteredPeople.length === 0 && <div className="no-results">✖ ไม่พบรายชื่อที่ค้นหา</div>}
       </div>
+
+      {/* 🟢 MODAL */}
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', zIndex: 999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }} onClick={() => setShowModal(false)}>
+          
+          <div style={{
+            background: 'var(--bg-card)', padding: '30px', borderRadius: '16px',
+            width: '100%', maxWidth: '500px', border: '1px solid var(--border-color)',
+            maxHeight: '90vh', overflowY: 'auto' // กันทะลุจอ
+          }} onClick={e => e.stopPropagation()}>
+            
+            <h2 style={{ marginTop: 0, marginBottom: '20px' }}>ลงทะเบียนผู้ประสบภัย</h2>
+            
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)' }}>
+              <button 
+                onClick={() => setActiveTab('manual')}
+                style={{ 
+                  padding: '10px 15px', background: 'transparent', border: 'none', cursor: 'pointer',
+                  borderBottom: activeTab === 'manual' ? '2px solid #ef6c00' : 'none',
+                  color: activeTab === 'manual' ? '#ef6c00' : 'var(--text-secondary)', fontWeight: 'bold'
+                }}
+              >
+                📝 กรอกเอง
+              </button>
+              <button 
+                onClick={() => setActiveTab('import')}
+                style={{ 
+                  padding: '10px 15px', background: 'transparent', border: 'none', cursor: 'pointer',
+                  borderBottom: activeTab === 'import' ? '2px solid #ef6c00' : 'none',
+                  color: activeTab === 'import' ? '#ef6c00' : 'var(--text-secondary)', fontWeight: 'bold'
+                }}
+              >
+                📂 Import JSON
+              </button>
+            </div>
+
+            {/* Content: Manual Form */}
+            {activeTab === 'manual' && (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div>
+                    <label>ชื่อ</label>
+                    <input type="text" className="search-input-table" required 
+                      value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                  </div>
+                  <div>
+                    <label>นามสกุล</label>
+                    <input type="text" className="search-input-table" required
+                      value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div>
+                    <label>อายุ</label>
+                    <input type="number" className="search-input-table" required
+                      value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} />
+                  </div>
+                  <div>
+                    <label>เพศ</label>
+                    <select className="search-input-table" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+                      <option value="male">ชาย</option>
+                      <option value="female">หญิง</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* ✅ 2. เปลี่ยนตรงนี้เป็น Searchable Dropdown */}
+                <div ref={wrapperRef} style={{ position: 'relative' }}>
+                  <label>ศูนย์พักพิง</label>
+                  <input 
+                    type="text" 
+                    className="search-input-table"
+                    placeholder="พิมพ์ชื่อศูนย์เพื่อค้นหา..."
+                    value={centerSearch}
+                    onChange={(e) => handleCenterSearch(e.target.value)}
+                    onFocus={() => setShowCenterList(true)}
+                    required
+                  />
+                  
+                  {/* Dropdown List */}
+                  {showCenterList && (
+                    <div style={{
+                      position: 'absolute', top: '100%', left: 0, right: 0,
+                      background: 'var(--bg-card)', border: '1px solid var(--border-color)', 
+                      borderRadius: '8px', maxHeight: '200px', overflowY: 'auto', zIndex: 100,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}>
+                      {filteredCenters.length > 0 ? (
+                        filteredCenters.map(c => (
+                          <div 
+                            key={c._id}
+                            onClick={() => selectCenter(c)}
+                            style={{
+                              padding: '10px 12px', cursor: 'pointer',
+                              borderBottom: '1px solid var(--border-color)',
+                              color: 'var(--text-primary)'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = 'var(--hover-color)'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {c.name}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '10px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                          ไม่พบศูนย์ที่ค้นหา
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                   <label>สถานะสุขภาพ</label>
+                   <select className="search-input-table" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                     <option value="normal">ร่างกายปกติ</option>
+                     <option value="sick">มีโรคประจำตัว</option>
+                     <option value="disabled">ผู้พิการ/ติดเตียง</option>
+                   </select>
+                </div>
+
+                {formData.status !== 'normal' && (
+                  <div>
+                    <label>ระบุโรคประจำตัว / อาการ</label>
+                    <input type="text" className="search-input-table" 
+                      value={formData.chronicDisease} onChange={e => setFormData({...formData, chronicDisease: e.target.value})} />
+                  </div>
+                )}
+
+                <button type="submit" className="btn-import" style={{ marginTop: '10px' }}>บันทึกข้อมูล</button>
+              </form>
+            )}
+
+            {/* Content: Import JSON */}
+            {activeTab === 'import' && (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📄</div>
+                <p style={{ marginBottom: '20px', color: 'var(--text-secondary)' }}>
+                  อัปโหลดไฟล์ .json ที่มีรูปแบบข้อมูลผู้ประสบภัย<br/>
+                  <code>[{"{"} "firstName": "...", "lastName": "..." ... {"}"}]</code>
+                </p>
+                <input 
+                  type="file" 
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  style={{ display: 'block', margin: '0 auto' }}
+                />
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -4,15 +4,17 @@ const BeneficiarySchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   age: { type: Number, required: true },
-  gender: { type: String, required: true },
-  centerId: { type: String, required: false }, // เก็บ ID ของศูนย์ที่อยู่
-  centerName: { type: String, required: false }, // เก็บชื่อศูนย์ (จะได้ไม่ต้อง Join ตาราง)
+  gender: { type: String, enum: ['male', 'female', 'other'], required: true },
+  
+  centerId: { type: String }, // ไอดีศูนย์พักพิง (ถ้ามี)
+  centerName: { type: String, required: true }, // ชื่อศูนย์พักพิง
+  
   status: { 
     type: String, 
-    enum: ['normal', 'sick', 'disabled', 'critical'], 
+    enum: ['normal', 'sick', 'disabled'], 
     default: 'normal' 
   },
-  chronicDisease: { type: String, default: '' }, // โรคประจำตัว
+  chronicDisease: { type: String, default: '-' }, // โรคประจำตัว
   registeredAt: { type: Date, default: Date.now }
 });
 

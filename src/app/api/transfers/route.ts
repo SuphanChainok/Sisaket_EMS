@@ -2,41 +2,62 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Transfer from '@/models/Transfer';
 
-// 🟢 GET: ดูรายการเบิกทั้งหมด
+// ฟังก์ชันช่วยสร้างเลขที่เอกสาร (TR-YYMM-XXX)
+async function generateDocNo() {
+  const now = new Date();
+  const year = (now.getFullYear() + 543).toString().slice(-2); // ปี พ.ศ. 2 หลัก (เช่น 68)
+  const month = (now.getMonth() + 1).toString().padStart(2, '0'); // เดือน 2 หลัก (เช่น 12)
+  const prefix = `TR-${year}${month}-`;
+
+  // หาใบลาสุดของเดือนนี้
+  const lastDoc = await Transfer.findOne({ docNo: { $regex: `^${prefix}` } })
+    .sort({ docNo: -1 })
+    .select('docNo');
+
+  let runningNo = 1;
+  if (lastDoc && lastDoc.docNo) {
+    const lastRunning = parseInt(lastDoc.docNo.split('-')[2]);
+    runningNo = lastRunning + 1;
+  }
+
+  // เติม 0 ข้างหน้าให้ครบ 3 หลัก (เช่น 001)
+  return `${prefix}${runningNo.toString().padStart(3, '0')}`;
+}
+
 export async function GET() {
   await dbConnect();
   try {
-    // เรียงเอาใบใหม่สุดขึ้นก่อน
-    const transfers = await Transfer.find({}).sort({ createdAt: -1 });
+    const transfers = await Transfer.find({}).sort({ createdAt: -1 }).limit(50);
     return NextResponse.json(transfers);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch transfers' }, { status: 500 });
   }
 }
 
-// 🟡 POST: เปิดใบขอเบิกใหม่ (สมมติว่าศูนย์เป็นคนกดขอมา)
-// ... imports
-
 export async function POST(req: Request) {
   await dbConnect();
   try {
     const body = await req.json();
-    
-    // สร้างเลขที่เอกสาร
-    const count = await Transfer.countDocuments();
-    const docNo = `TR-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
 
-    console.log("กำลังสร้างใบเบิก:", docNo, body); // ✅ เพิ่ม Log 1
+    // ✅ สร้างเลขที่เอกสารอัตโนมัติ
+    const newDocNo = await generateDocNo();
 
     const newTransfer = await Transfer.create({
-      ...body,
-      docNo,
-      status: 'pending'
+      docNo: newDocNo, // ใส่เลขที่เอกสาร
+      
+      destination: body.destination,
+      centerId: body.centerId,
+      centerName: body.centerName, // หรือใช้ body.destination ถ้าชื่อเหมือนกัน
+      
+      items: body.items,
+      requestedBy: body.requestedBy || 'เจ้าหน้าที่',
+      status: 'pending',
+      createdAt: new Date()
     });
 
     return NextResponse.json(newTransfer);
-  } catch (error: any) { // ✅ แก้ตรงนี้ให้รับ type any
-    console.error("❌ Error สร้างใบเบิก:", error.message); // ✅ ให้มันพ่น Error ออกมาทาง Terminal
-    return NextResponse.json({ error: error.message || 'Failed to create transfer' }, { status: 500 });
+  } catch (error: any) {
+    console.error("Create Transfer Error:", error);
+    return NextResponse.json({ error: error.message || 'Failed to create request' }, { status: 500 });
   }
 }
