@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Center from '@/models/Center';
-import { createLog } from '@/lib/logger'; // ✅ Import
+import { createLog } from '@/lib/logger'; // ✅ Import ให้เรียบร้อย
 
 // 🟢 GET: ดึงข้อมูลศูนย์ทั้งหมด
 export async function GET() {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       };
     });
 
-    const validData = dataToInsert.filter((d) => d.name !== 'ไม่ระบุชื่อ');
+    const validData = dataToInsert.filter((d: any) => d.name !== 'ไม่ระบุชื่อ');
 
     if (validData.length === 0) {
       return NextResponse.json({ error: 'ไม่พบข้อมูลที่ใช้งานได้' }, { status: 400 });
@@ -63,14 +63,14 @@ export async function POST(req: Request) {
       if (e.code !== 11000) throw e; 
     }
 
-    // ✅ 2. เพิ่ม Log
+    // ✅ Log: บันทึกการเพิ่มศูนย์
     const count = validData.length;
-    const sampleNames = validData.slice(0, 5).map(d => d.name).join(', ');
+    const sampleNames = validData.slice(0, 5).map((d: any) => d.name).join(', ');
     const logDesc = count > 5 
       ? `เพิ่ม/นำเข้าศูนย์ ${count} แห่ง: ${sampleNames} ...`
       : `เพิ่ม/นำเข้าศูนย์ ${count} แห่ง: ${sampleNames}`;
 
-    // (แก้ไขถูกต้องแล้ว)
+    // 🔥 จุดแก้ที่ 1: ต้องมี 'Admin' หรือชื่อ User เป็นตัวแรก
     await createLog('Admin', 'CREATE_CENTER', logDesc);
 
     return NextResponse.json({ 
@@ -100,7 +100,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Center not found' }, { status: 404 });
     }
 
-    // ✅ แก้ไขตรงนี้: เพิ่ม 'Admin' เข้าไปเป็น Argument แรก
+    // 🔥 จุดแก้ที่ 2: ต้องมี 'Admin' เป็นตัวแรกเหมือนกัน
     await createLog('Admin', 'DELETE_CENTER', `ลบศูนย์พักพิง: ${deletedCenter.name}`);
 
     return NextResponse.json({ message: 'Center deleted successfully' });
